@@ -77,16 +77,11 @@ public class LibreReceiver extends BroadcastReceiver {
                                 break;
 
                             case Intents.LIBRE2_BG:
-                                Libre2RawValue currentRawValue = processIntent(intent);
-                                if (currentRawValue == null) return;
-                                Log.v(TAG,"got bg reading: from sensor:"+currentRawValue.serial+" rawValue:"+currentRawValue.glucose+" at:"+currentRawValue.timestamp);
-                                // period of 4.5 minutes to collect 5 readings
-                                if(!BgReading.last_within_millis(45 * 6 * 1000 )) {
-                                    List<Libre2RawValue> smoothingValues = Libre2RawValue.last20Minutes();
-                                    smoothingValues.add(currentRawValue);
-                                    processValues(currentRawValue, smoothingValues, context);
-                                }
-                                currentRawValue.save();
+                                Libre2RawValue currentValue = processIntent(intent);
+                                if (currentValue == null) return;
+                                Log.v(TAG,"got bg reading: from APP sensor:"+currentRawValue.serial+" Value:"+currentRawValue.glucose+" at:"+currentRawValue.timestamp);
+                                BgReading.bgReadingInsertLibre2(currentValue.glucose, currentValue.timestamp, currentValue.glucose);
+                                currentValue.save();
 
                                 break;
 
@@ -129,16 +124,7 @@ public class LibreReceiver extends BroadcastReceiver {
         rawValue.serial = serial;
         return rawValue;
     }
-    private static void processValues(Libre2RawValue currentValue, List<Libre2RawValue> smoothingValues, Context context) {
-        if (Sensor.currentSensor() == null) {
-            Sensor.create(currentValue.timestamp, currentValue.serial);
-
-        }
-
-        double value = calculateWeightedAverage(smoothingValues, currentValue.timestamp);
-
-        BgReading.bgReadingInsertLibre2(value, currentValue.timestamp,currentValue.glucose);
-    }
+    
 
     private static void saveSensorStartTime(Bundle sensor, String serial) {
         if (sensor != null && sensor.containsKey("sensorStartTime")) {
