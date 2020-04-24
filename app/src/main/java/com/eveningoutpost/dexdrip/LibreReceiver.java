@@ -79,8 +79,9 @@ public class LibreReceiver extends BroadcastReceiver {
                             case Intents.LIBRE2_BG:
                                 Libre2RawValue currentValue = processIntent(intent);
                                 if (currentValue == null) return;
-                                Log.v(TAG,"got bg reading: from APP sensor:"+currentRawValue.serial+" Value:"+currentRawValue.glucose+" at:"+currentRawValue.timestamp);
-                                BgReading.bgReadingInsertLibre2(currentValue.glucose, currentValue.timestamp, currentValue.glucose);
+                                Log.v(TAG,"got bg reading: from APP patched:"+currentValue.serial+" Value:"+currentValue.glucose+" at:"+currentValue.timestamp);
+                                BgReading.bgReadingInsertLibre2(currentValue.glucose, currentValue.timestamp,currentValue.glucose);
+
                                 currentValue.save();
 
                                 break;
